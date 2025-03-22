@@ -7,13 +7,11 @@ contract ArchivaRegistry {
     struct ContractInfo {
         address contractAddress;
         ContractState state;
-        string ipfsHash; // For storing IPFS hash of archived contracts
+        string ipfsHash;
     }
 
     mapping(address => ContractInfo) public contracts;
     address[] public contractList;
-
-    event ContractStateUpdated(address indexed contractAddress, ContractState state, string ipfsHash);
 
     // Add a new contract to the registry
     function addContract(address contractAddress) public {
@@ -27,7 +25,6 @@ contract ArchivaRegistry {
         require(contracts[contractAddress].contractAddress != address(0), "Contract does not exist");
         contracts[contractAddress].state = newState;
         contracts[contractAddress].ipfsHash = ipfsHash;
-        emit ContractStateUpdated(contractAddress, newState, ipfsHash);
     }
 
     // Get the state of a contract
