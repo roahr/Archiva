@@ -104,6 +104,32 @@ app.get('/contracts', async (req, res) => {
   }
 });
 
+app.get('/contract/:contract_id', async (req, res) => {
+  try {
+    const { contract_id } = req.params;
+    const response = await axios.get(`${BLOCKSCOUT_API_URL}?module=contract&action=getsourcecode&address=${contract_id}`);
+    const contractDetails = response.data.result[0];
+    const formattedResponse = {
+      message: "OK",
+      result: {
+        ABI: contractDetails.ABI,
+        CompilerVersion: contractDetails.CompilerVersion,
+        ContractName: contractDetails.ContractName,
+        FileName: contractDetails.FileName,
+        ImplementationAddress: contractDetails.ImplementationAddress,
+        IsProxy: contractDetails.IsProxy,
+        OptimizationUsed: contractDetails.OptimizationUsed,
+        SourceCode: contractDetails.SourceCode
+      },
+      status: "1"
+    };
+
+    res.json(formattedResponse);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`API running at http://${getLocalIP()}:${port}`);
 });
