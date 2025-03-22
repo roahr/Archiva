@@ -80,6 +80,30 @@ app.get('/connect-wallet', async (req, res) => {
   }
 });
 
+app.get('/contracts', async (req, res) => {
+  try {
+    const { address } = req.query;
+    if (!address) {
+      return res.status(400).json({ error: "Missing wallet address" });
+    }
+    const transactionsResponse = await axios.get(`${BLOCKSCOUT_API_URL}?module=account&action=txlist&address=${address}`);
+    const transactions = transactionsResponse.data.result;
+    const contractCreationTxs = transactions.filter(tx => tx.to === null || tx.to === "");
+    const contracts = await Promise.all(contractCreationTxs.map(async tx => {
+      const contractAddress = tx.contractAddress;
+      const txHash = tx.hash;
+      const contractResponse = await axios.get(`${BLOCKSCOUT_API_URL}?module=transaction&action=gettxinfo&txhash=${txHash}`);
+      return {
+        address: contractAddress,     
+        contractResponse: contractResponse.data.result};
+    }));
+
+    res.json({ contracts });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`API running at http://${getLocalIP()}:${port}`);
 });
