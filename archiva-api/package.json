@@ -19,5 +19,9 @@
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.14.1"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.19"
+  }
 }
