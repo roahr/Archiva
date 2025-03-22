@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import { networkInterfaces } from 'os';
+import hre from 'hardhat';
 
 dotenv.config();
 const { Pool } = pkg;
@@ -126,6 +127,27 @@ app.get('/contract/:contract_id', async (req, res) => {
 
     res.json(formattedResponse);
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/verify-contract', async (req, res) => {
+  try {
+    const { contractAddress } = req.body;
+
+    if (!contractAddress) {
+      return res.status(400).json({ error: "Contract address and contract name are required" });
+    }
+
+    await hre.run("verify:verify", {
+      address: contractAddress,
+      constructorArguments: [],
+      network: "opencampus",
+    });
+
+    res.json({ message: "Contract verified successfully" });
+  } catch (error) {
+    console.error("Verification Error:", error.message);
     res.status(500).json({ error: error.message });
   }
 });
