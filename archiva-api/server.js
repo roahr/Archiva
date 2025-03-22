@@ -66,7 +66,19 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.get('/connect-wallet', async (req, res) => {
+  try {
+    const { address } = req.query;
+    if (!address) {
+      return res.status(400).json({ error: "Missing wallet address" });
+    }
 
+    const response = await axios.get(`${BLOCKSCOUT_API_URL}?module=account&action=balance&address=${address}`);
+    res.json({ walletAddress: address, balance: response.data.result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`API running at http://${getLocalIP()}:${port}`);
