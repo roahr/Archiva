@@ -19,7 +19,7 @@ By archiving deployed contracts onto **IPFS**, Archiva significantly **reduces b
 
 ## **Flow Diagram**  
 
-![Archiva Flow Diagram](https://via.placeholder.com/800x400.png?text=Archiva+Flow+Diagram)  
+![archiva-flow-chart](https://github.com/user-attachments/assets/8531d933-7001-4e84-bb03-81562e7bb3e4)
 
 
 ## **Features**  
