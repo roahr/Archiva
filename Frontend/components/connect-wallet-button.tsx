@@ -44,7 +44,11 @@ export function ConnectWalletButton() {
     const ethereum = (window as any).ethereum;
     if (typeof ethereum !== "undefined") {
       try {
+<<<<<<< HEAD
         const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
+=======
+        const currentChainId = await (window as any).ethereum.request({ method: "eth_chainId" });
+>>>>>>> 428487ba629acfe5c146f6aca77a3b2deccbc8a9
 
         // Switch to EDU Chain Testnet if not already connected
         if (currentChainId !== EDU_CHAIN_ID) {
@@ -81,7 +85,11 @@ export function ConnectWalletButton() {
         }
 
         // Request account access
+<<<<<<< HEAD
         const accounts = await window.avalanche.request({ method: "eth_requestAccounts" });
+=======
+        const accounts = await (window as any).avalanche.request({ method: "eth_requestAccounts" });
+>>>>>>> 428487ba629acfe5c146f6aca77a3b2deccbc8a9
         const walletAddress = accounts[0];
         setConnected(true);
         setWalletAddress(walletAddress);
