@@ -166,13 +166,6 @@ npm run start:prod
 - Secure key management
 - Rate limiting implemented
 
-## 📚 Documentation
-
-- [API Documentation](docs/api.md)
-- [Smart Contract Documentation](docs/contracts.md)
-- [Frontend Documentation](docs/frontend.md)
-- [Deployment Guide](docs/deployment.md)
-
 ## 🤝 Contributing
 
 1. Fork the repository
