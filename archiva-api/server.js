@@ -498,54 +498,6 @@ app.post("/compile-contract", upload.single("contract"), async (req, res) => {
       await fs.remove(contractPath);
       return res.status(400).json({ error: "Invalid Solidity file: Contract name not found." });
     }
-<<<<<<< HEAD
-
-    console.log("Contract saved at:", contractPath);
-    console.log("Contract name:", contractName);
-
-    // Run Hardhat compile with detailed output
-    exec("npx hardhat compile --force", { cwd: __dirname }, async (error, stdout, stderr) => {
-      if (error) {
-        console.error("Compilation error:", stderr);
-        await fs.remove(contractPath);
-        return res.status(500).json({ 
-          error: "Compilation failed", 
-          details: stderr.toString() 
-        });
-      }
-
-      console.log("Compilation output:", stdout);
-
-      // Check if artifacts were generated
-      const artifactPath = path.join(__dirname, "artifacts/contracts/Contract.sol", `${contractName}.json`);
-      console.log("Looking for artifact at:", artifactPath);
-
-      if (!fs.existsSync(artifactPath)) {
-        console.error("Artifact not found at:", artifactPath);
-        return res.status(500).json({ 
-          error: "Compilation artifact not found", 
-          details: "Contract compiled but artifacts were not generated properly" 
-        });
-      }
-
-      // Read the artifact to ensure it's valid
-      try {
-        const artifact = await fs.readJson(artifactPath);
-        console.log("Artifact validation successful");
-        
-        res.json({ 
-          contractName,
-          message: "Compilation successful",
-          artifactPath: path.relative(__dirname, artifactPath),
-          abi: artifact.abi
-        });
-      } catch (err) {
-        console.error("Error reading artifact:", err);
-        return res.status(500).json({ 
-          error: "Invalid artifact", 
-          details: "Artifact file exists but could not be read properly" 
-        });
-=======
     exec("npx hardhat compile", async (error, stdout, stderr) => {
       try {
 
@@ -572,7 +524,6 @@ app.post("/compile-contract", upload.single("contract"), async (req, res) => {
           await fs.remove(tempContractPath);
 
         }
->>>>>>> 428487ba629acfe5c146f6aca77a3b2deccbc8a9
       }
     });
   } catch (err) {
@@ -593,7 +544,6 @@ app.post("/deploy-contract", async (req, res) => {
   console.log(`Deploying contract: ${contractName}`);
 
   try {
-<<<<<<< HEAD
     // Verify the artifact exists before attempting deployment
     const artifactPath = path.join(__dirname, "artifacts/contracts/Contract.sol", `${contractName}.json`);
     if (!fs.existsSync(artifactPath)) {
@@ -634,13 +584,6 @@ app.post("/deploy-contract", async (req, res) => {
       error: "Deployment failed", 
       details: deployError.message 
     });
-=======
-    const contractAddress = await deployContract(contractName, constructorArgs);
-    deployedContracts[contractName] = contractAddress; // Store deployed contract
-    res.json({ contractName, address: contractAddress });
-  } catch (deployError) {
-    res.status(500).json({ error: "Deployment failed", details: deployError.message });
->>>>>>> 428487ba629acfe5c146f6aca77a3b2deccbc8a9
   }
 });
 
