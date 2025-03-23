@@ -219,9 +219,9 @@ const generateToken = (email) => {
   return jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
-async function deployContract(contractName) {
+async function deployContract(contractName, constructorArgs = []) {
   try {
-    const Contract = await hre.ethers.deployContract(contractName);
+    const Contract = await hre.ethers.deployContract(contractName, constructorArgs);
     await Contract.waitForDeployment();
     console.log(`Contract deployed at ${Contract.target}`);
     return Contract.target;
@@ -369,26 +369,25 @@ app.post("/compile-contract", upload.single("contract"), async (req, res) => {
 });
 
 app.post("/deploy-contract", async (req, res) => {
-
   if (!req.body || Object.keys(req.body).length === 0) {
-      return res.status(400).json({ error: "Invalid or empty JSON body" });
+    return res.status(400).json({ error: "Invalid or empty JSON body" });
   }
 
-  const { contractName } = req.body;
+  const { contractName, constructorArgs } = req.body;
   console.log(`Deploying contract: ${contractName}`);
 
   try {
-      const contractAddress = await deployContract(contractName);
-      deployedContracts[contractName] = contractAddress; // Store deployed contract
-      res.json({ contractName, address: contractAddress });
+    const contractAddress = await deployContract(contractName, constructorArgs);
+    deployedContracts[contractName] = contractAddress; // Store deployed contract
+    res.json({ contractName, address: contractAddress });
   } catch (deployError) {
-      res.status(500).json({ error: "Deployment failed", details: deployError.message });
+    res.status(500).json({ error: "Deployment failed", details: deployError.message });
   }
 });
 
 app.post('/verify-contract', async (req, res) => {
   try {
-    const { contractAddress } = req.body;
+    const { contractAddress, constructorArgs } = req.body;
 
     if (!contractAddress) {
       return res.status(400).json({ error: "Contract address is required" });
@@ -396,7 +395,7 @@ app.post('/verify-contract', async (req, res) => {
 
     await hre.run("verify:verify", {
       address: contractAddress,
-      constructorArguments: [],
+      constructorArguments: constructorArgs || [], // Pass constructorArgs
       network: "opencampus",
     });
 
@@ -519,6 +518,52 @@ app.get('/archived-contracts', async (req, res) => {
   }
 });
 
+// Utility function to fetch gas and storage usage for a contract
+const fetchGasAndStorageUsage = async (contractAddress) => {
+  const response = await axios.get(`${BLOCKSCOUT_API_URL}?module=account&action=txlist&address=${contractAddress}`);
+  const transactions = response.data.result;
+  const totalGas = transactions.reduce((sum, tx) => sum + parseInt(tx.gasUsed), 0);
+  const totalStorage = transactions.reduce((sum, tx) => sum + parseInt(tx.storageUsed), 0);
+  return { totalGas, totalStorage };
+};
+
+app.post('/compare-gas-and-storage', async (req, res) => {
+  try {
+    const { contractAddresses } = req.body;
+    if (!contractAddresses || !Array.isArray(contractAddresses)) {
+      return res.status(400).json({ error: "Contract addresses array is required" });
+    }
+
+    console.log("Fetching gas and storage usage before archiving...");
+    const resultsBefore = [];
+    for (const address of contractAddresses) {
+      console.log(`Fetching data for contract: ${address}`);
+      const { totalGas, totalStorage } = await fetchGasAndStorageUsage(address);
+      resultsBefore.push({ address, totalGas, totalStorage });
+    }
+
+    console.log("Archiving contracts...");
+    for (const address of contractAddresses) {
+      console.log(`Archiving contract: ${address}`);
+      await axios.post('http://localhost:5000/archive-contract', { contractAddress: address });
+    }
+
+    console.log("Fetching gas and storage usage after archiving...");
+    const resultsAfter = [];
+    for (const address of contractAddresses) {
+      console.log(`Fetching data for contract: ${address}`);
+      const { totalGas, totalStorage } = await fetchGasAndStorageUsage(address);
+      resultsAfter.push({ address, totalGas, totalStorage });
+    }
+
+    console.log("Comparison completed successfully.");
+    res.json({ resultsBefore, resultsAfter });
+  } catch (error) {
+    console.error("Error in /compare-gas-and-storage:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`API running at http://${getLocalIP()}:${port}`);
 });
@@ -534,4 +579,3 @@ function getLocalIP() {
   }
   return 'localhost';
 }
-
