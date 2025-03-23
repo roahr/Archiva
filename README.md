@@ -2,12 +2,11 @@
 
 ![Tech Stack](https://img.shields.io/badge/Tech%20Stack-Blockchain%20%7C%20Solidity%20%7C%20IPFS%20%7C%20Node.js%20%7C%20Hardhat%20%7C%20AI%20Tools-blue)  
 
-
 **Archiva** is an advanced **smart contract management solution** designed for **EduChain**, a blockchain-powered educational ecosystem. It optimizes **contract storage**, **reduces gas fees**, and enhances lifecycle management with **AI-driven automation**.  
 
 By archiving deployed contracts onto **IPFS**, Archiva significantly **reduces blockchain congestion** while ensuring secure, cost-effective, and **on-demand retrieval** of archived contracts.  
 
-
+---
 
 ## **Deployment Details**  
 
@@ -16,21 +15,23 @@ By archiving deployed contracts onto **IPFS**, Archiva significantly **reduces b
 - **Pitch Presentation**: [View on Canva](https://www.canva.com/design/DAGig3-OC2Q/EBWs-sQS-CLSQzYDmNxRrA/view?utm_content=DAGig3-OC2Q&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h428ccc385a)  
 - **Demo Video**: [Watch on YouTube](https://youtu.be/T91wkT9NWd4)  
 
+---
 
 ## **Flow Diagram**  
 
 ![archiva-flow-chart](https://github.com/user-attachments/assets/8531d933-7001-4e84-bb03-81562e7bb3e4)
 
+---
 
 ## **Features**  
 
-**Smart Contract Archiving** – Offloads deployed contracts to IPFS, reducing blockchain storage costs.  
-**Gas Fee Optimization** – Minimizes gas consumption during contract interactions.  
-**AI-Assisted Development** – Provides AI-powered code suggestions, optimizations, and security fixes.  
-**Full Contract Lifecycle Management** – Enables seamless contract tracking, archiving, and restoration.  
-**Seamless Integration with EduChain** – Designed to function natively within the EduChain ecosystem.  
+- **Smart Contract Archiving** – Offloads deployed contracts to IPFS, reducing blockchain storage costs.  
+- **Gas Fee Optimization** – Minimizes gas consumption during contract interactions.  
+- **AI-Assisted Development** – Provides AI-powered code suggestions, optimizations, and security fixes.  
+- **Full Contract Lifecycle Management** – Enables seamless contract tracking, archiving, and restoration.  
+- **Seamless Integration with EduChain** – Designed to function natively within the EduChain ecosystem.  
 
-
+---
 
 ## **How It Works**  
 
@@ -40,7 +41,7 @@ By archiving deployed contracts onto **IPFS**, Archiva significantly **reduces b
 4. **AI-Powered Enhancements** – Optimize code, detect vulnerabilities, and enhance security.  
 5. **Lifecycle Management** – Monitor, archive, and reactivate contracts seamlessly.  
 
-
+---
 
 ## **Tech Stack**  
 
@@ -49,6 +50,7 @@ By archiving deployed contracts onto **IPFS**, Archiva significantly **reduces b
 - **Backend**: Node.js, Express.js  
 - **AI Tools**: Smart contract analysis and auto-completion  
 - **Frontend**: React.js (for future integrations)  
+- **Verification**: Contract verification tools  
 
 ---
 
@@ -80,19 +82,42 @@ By archiving deployed contracts onto **IPFS**, Archiva significantly **reduces b
 
 ## **Installation and Setup**  
 
+The project is divided into three directories:  
+1. [**Website**]() – Contains the frontend code.  
+2. [**API**](https://github.com/roahr/Archiva/tree/main/archiva-api) – Contains the backend server and API logic.  
+3. [**Smart Contracts**](https://github.com/roahr/Archiva/tree/main/archiva-educhain) – Contains the Solidity contracts and deployment scripts.  
+
 ### **1. Clone the Repository**  
 ```sh
-git clone https://github.com/roahr/archiva-educhain.git
-cd archiva-educhain
+git clone https://github.com/roahr/archiva.git
+cd archiva
 ```
 
 ### **2. Install Dependencies**  
+Navigate to each directory and install dependencies:  
+
+#### **Website**  
 ```sh
+cd frontend
+npm install
+```
+
+#### **API**  
+```sh
+cd archiva-api
+npm install
+```
+
+#### **Smart Contracts**  
+```sh
+cd archiva-educhain
 npm install
 ```
 
 ### **3. Set Up Environment Variables**  
-Create a `.env` file and add the following:  
+Create a `.env` file in the **API** and **Smart Contracts** directories and add the required variables.  
+
+#### **API/.env**  
 ```sh
 DATABASE_URL=your_database_url
 JWT_SECRET=your_jwt_secret
@@ -102,10 +127,29 @@ PINATA_API_KEY=your_ipfs_api_key
 PINATA_SECRET_API_KEY=your_ipfs_secret_key
 ```
 
-### **4. Start the Server**  
+#### **Smart Contracts/.env**  
 ```sh
+EDUCHAIN_RPC_URL=your_rpc_url
+PRIVATE_KEY=your_wallet_private_key
+PINATA_API_KEY=your_ipfs_api_key
+PINATA_SECRET_API_KEY=your_ipfs_secret_key
+```
+
+### **4. Start the Servers**  
+- **API**:  
+```sh
+cd archiva-api
 node server.js
 ```
+
+- **Website**:  
+```sh
+cd frontend
+npm run dev
+```
+
+- **Smart Contracts**:  
+Follow the deployment instructions in the `smart-contracts/README.md` file.  
 
 ---
 
@@ -129,4 +173,4 @@ node server.js
 
 ## **License**  
 
-This project is licensed under the **MIT License**.  
+This project is licensed under the **MIT License**.
