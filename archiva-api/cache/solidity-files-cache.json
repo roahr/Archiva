@@ -1,0 +1,41 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "X:\\HackVerse\\Archiva\\archiva-api\\contracts\\ArchivaRegistry.sol": {
+      "lastModificationDate": 1742690074750,
+      "contentHash": "ae14e067d5e9326c64664f1ff89dd28b",
+      "sourceName": "contracts/ArchivaRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.28"
+      ],
+      "artifacts": [
+        "ArchivaRegistry"
+      ]
+    }
+  }
+}

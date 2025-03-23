@@ -6,7 +6,9 @@ module.exports = {
   solidity: "0.8.28",
   defaultNetwork: "opencampus",
   paths: {
-    artifacts: "./test",
+    sources: "./contracts",
+    artifacts: "./artifacts",
+    cache: "./cache"
   },
   networks: {
     opencampus: {

@@ -347,42 +347,148 @@ app.post("/compile-contract", upload.single("contract"), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    const tempContractPath = path.join(__dirname, "temp", `${Date.now()}_${req.file.originalname}`);
-    await fs.move(req.file.path, tempContractPath, { overwrite: true });
 
-    const contractName = getContractName(tempContractPath);
+    // Create contracts directory in the Hardhat project structure
+    const contractsDir = path.join(__dirname, "contracts");
+    if (!fs.existsSync(contractsDir)) {
+      fs.mkdirSync(contractsDir, { recursive: true });
+    }
+
+    // Clean up any existing contract files and artifacts to avoid conflicts
+    const files = fs.readdirSync(contractsDir);
+    for (const file of files) {
+      if (file.endsWith('.sol')) {
+        fs.unlinkSync(path.join(contractsDir, file));
+      }
+    }
+
+    // Clean artifacts directory
+    const artifactsDir = path.join(__dirname, "artifacts");
+    if (fs.existsSync(artifactsDir)) {
+      fs.removeSync(artifactsDir);
+    }
+
+    // Clean cache directory
+    const cacheDir = path.join(__dirname, "cache");
+    if (fs.existsSync(cacheDir)) {
+      fs.removeSync(cacheDir);
+    }
+
+    // Move the uploaded file to the contracts directory with a simple name
+    const contractPath = path.join(contractsDir, "Contract.sol");
+    await fs.move(req.file.path, contractPath, { overwrite: true });
+
+    const contractName = getContractName(contractPath);
     if (!contractName) {
-      await fs.remove(tempContractPath);
+      await fs.remove(contractPath);
       return res.status(400).json({ error: "Invalid Solidity file: Contract name not found." });
     }
-    exec("npx hardhat compile", async (error, stdout, stderr) => {
+
+    console.log("Contract saved at:", contractPath);
+    console.log("Contract name:", contractName);
+
+    // Run Hardhat compile with detailed output
+    exec("npx hardhat compile --force", { cwd: __dirname }, async (error, stdout, stderr) => {
       if (error) {
-        await fs.remove(tempContractPath);
-        return res.status(500).json({ error: "Compilation failed", details: stderr });
+        console.error("Compilation error:", stderr);
+        await fs.remove(contractPath);
+        return res.status(500).json({ 
+          error: "Compilation failed", 
+          details: stderr.toString() 
+        });
       }
-      console.log(`Compilation successful for ${contractName}`);
-      res.json({ contractName });
+
+      console.log("Compilation output:", stdout);
+
+      // Check if artifacts were generated
+      const artifactPath = path.join(__dirname, "artifacts/contracts/Contract.sol", `${contractName}.json`);
+      console.log("Looking for artifact at:", artifactPath);
+
+      if (!fs.existsSync(artifactPath)) {
+        console.error("Artifact not found at:", artifactPath);
+        return res.status(500).json({ 
+          error: "Compilation artifact not found", 
+          details: "Contract compiled but artifacts were not generated properly" 
+        });
+      }
+
+      // Read the artifact to ensure it's valid
+      try {
+        const artifact = await fs.readJson(artifactPath);
+        console.log("Artifact validation successful");
+        
+        res.json({ 
+          contractName,
+          message: "Compilation successful",
+          artifactPath: path.relative(__dirname, artifactPath),
+          abi: artifact.abi
+        });
+      } catch (err) {
+        console.error("Error reading artifact:", err);
+        return res.status(500).json({ 
+          error: "Invalid artifact", 
+          details: "Artifact file exists but could not be read properly" 
+        });
+      }
     });
   } catch (err) {
-    res.status(500).json({ error: "Server error", details: err.message });
+    console.error("Server error during compilation:", err);
+    res.status(500).json({ 
+      error: "Server error", 
+      details: err.message 
+    });
   }
 });
 
 app.post("/deploy-contract", async (req, res) => {
-
   if (!req.body || Object.keys(req.body).length === 0) {
-      return res.status(400).json({ error: "Invalid or empty JSON body" });
+    return res.status(400).json({ error: "Invalid or empty JSON body" });
   }
 
   const { contractName } = req.body;
   console.log(`Deploying contract: ${contractName}`);
 
   try {
-      const contractAddress = await deployContract(contractName);
-      deployedContracts[contractName] = contractAddress; // Store deployed contract
-      res.json({ contractName, address: contractAddress });
+    // Verify the artifact exists before attempting deployment
+    const artifactPath = path.join(__dirname, "artifacts/contracts/Contract.sol", `${contractName}.json`);
+    if (!fs.existsSync(artifactPath)) {
+      throw new Error(`Contract artifact not found at ${artifactPath}`);
+    }
+
+    console.log("Found artifact at:", artifactPath);
+    
+    // Load the artifact to verify it's valid
+    const artifact = await fs.readJson(artifactPath);
+    if (!artifact || !artifact.abi) {
+      throw new Error('Invalid artifact: missing ABI');
+    }
+
+    const contractAddress = await deployContract(contractName);
+    console.log("Contract deployed at:", contractAddress);
+
+    // Get the transaction hash from the deployment
+    const code = await provider.getCode(contractAddress);
+    if (code === '0x') {
+      throw new Error('Contract deployment failed - no code at address');
+    }
+
+    deployedContracts[contractName] = contractAddress;
+    
+    // Get the latest transaction for this address to find the deployment transaction
+    const tx = await provider.getTransaction(contractAddress);
+    
+    res.json({ 
+      contractName, 
+      address: contractAddress,
+      transactionHash: tx ? tx.hash : undefined,
+      message: "Contract deployed successfully"
+    });
   } catch (deployError) {
-      res.status(500).json({ error: "Deployment failed", details: deployError.message });
+    console.error("Deployment error:", deployError);
+    res.status(500).json({ 
+      error: "Deployment failed", 
+      details: deployError.message 
+    });
   }
 });
 
