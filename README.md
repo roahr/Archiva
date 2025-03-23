@@ -82,7 +82,7 @@ By archiving deployed contracts onto **IPFS**, Archiva significantly **reduces b
 
 ### **1. Clone the Repository**  
 ```sh
-git clone https://github.com/your-repo/archiva-educhain.git
+git clone https://github.com/roahr/archiva-educhain.git
 cd archiva-educhain
 ```
 
@@ -104,7 +104,7 @@ PINATA_SECRET_API_KEY=your_ipfs_secret_key
 
 ### **4. Start the Server**  
 ```sh
-npm start
+node server.js
 ```
 
 ---
