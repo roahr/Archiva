@@ -13,6 +13,7 @@ import fs from 'fs-extra';
 import { exec } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import Groq from 'groq-sdk';
 
 
 dotenv.config();
@@ -170,6 +171,120 @@ const archivaRegistryABI = [
   ];
 
 const archivaRegistry = new ethers.Contract(archivaRegistryAddress, archivaRegistryABI, provider);
+
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+const groq = new Groq({ apiKey: GROQ_API_KEY });
+
+
+
+
+
+function sanitizeJsonString(jsonString) {
+
+  if (typeof jsonString !== 'string') return jsonString;
+
+  let cleaned = jsonString.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+
+  
+
+  const jsonStartIndex = cleaned.indexOf('{');
+
+  const jsonEndIndex = cleaned.lastIndexOf('}') + 1;
+
+  
+
+  if (jsonStartIndex >= 0 && jsonEndIndex > jsonStartIndex) {
+
+    cleaned = cleaned.substring(jsonStartIndex, jsonEndIndex);
+
+  }
+
+
+  console.log("Sanitized JSON:", cleaned.substring(0, 100) + "...");
+
+  return cleaned;
+
+}
+
+
+async function generateWithGroq(prompt, model = "llama-3.3-70b-versatile") {
+
+  let retries = 3; 
+
+  let backoffTime = 5000; 
+
+  
+
+  console.log(`Calling Groq API with model: ${model}`);
+
+  console.log(`Prompt (first 100 chars): ${prompt.substring(0, 100)}...`);
+
+  
+
+  while (retries > 0) {
+
+    try {
+
+      const response = await groq.chat.completions.create({
+
+        model: model,
+
+        messages: [
+
+          { role: "system", content: "You are an advanced Solidity AI expert with deep knowledge of smart contract security, gas optimizations, and best practices." },
+
+          { role: "user", content: prompt }
+
+        ],
+
+        temperature: 0.3,
+
+        max_tokens: 2048,
+
+        top_p: 1,
+
+        stream: false,
+
+      });
+
+
+
+      const responseContent = response.choices[0]?.message?.content || "";
+
+      console.log(`Received response (first 100 chars): ${responseContent.substring(0, 100)}...`);
+
+      return responseContent;
+
+    } catch (error) {
+
+      if (error.message.includes("rate limit")) {
+
+        console.warn(`Rate limit hit! Retrying in ${backoffTime/1000} seconds...`);
+
+        await new Promise((resolve) => setTimeout(resolve, backoffTime));
+
+        retries--;
+
+        
+
+        backoffTime *= 2;
+
+      } else {
+
+        console.error("Groq API error:", error.message);
+
+        throw error;
+
+      }
+
+    }
+
+  }
+
+  throw new Error("Failed due to repeated rate limiting");
+
+}
 
 const uploadToPinata = async (data) => {
   try {
@@ -356,12 +471,32 @@ app.post("/compile-contract", upload.single("contract"), async (req, res) => {
       return res.status(400).json({ error: "Invalid Solidity file: Contract name not found." });
     }
     exec("npx hardhat compile", async (error, stdout, stderr) => {
-      if (error) {
-        await fs.remove(tempContractPath);
-        return res.status(500).json({ error: "Compilation failed", details: stderr });
+      try {
+
+        if (error) {
+
+          return res.status(500).json({ error: "Compilation failed", details: stderr });
+
+        }
+
+
+
+        console.log(`Compilation successful for ${contractName}`);
+
+        res.json({ contractName });
+
+      } catch (execError) {
+
+        res.status(500).json({ error: "Execution error", details: execError.message });
+
+      } finally {
+
+        if (tempContractPath) {
+
+          await fs.remove(tempContractPath);
+
+        }
       }
-      console.log(`Compilation successful for ${contractName}`);
-      res.json({ contractName });
     });
   } catch (err) {
     res.status(500).json({ error: "Server error", details: err.message });
@@ -515,6 +650,113 @@ app.get('/archived-contracts', async (req, res) => {
     res.json({ archivedContracts: filteredArchivedContracts });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/codeai/autocomplete", async (req, res) => {
+  try {
+    console.log("Autocomplete request received:", new Date().toISOString());
+    const { code } = req.body;
+
+    if (!code || typeof code !== "string") {
+      console.log("Invalid code input received");
+      return res.status(400).json({ error: "Valid code input is required" });
+    }
+
+    console.log(`Code length: ${code.length}`);
+    console.log(`Code snippet: ${code.substring(0, 100)}...`);
+
+    const prompt = `You are an AI Solidity expert. Predict the next optimal lines of Solidity code based on the following existing code:\n\n${code}\n\nEnsure your prediction follows best practices, maintains readability, and avoids unnecessary complexity. Provide only the suggested Solidity code without explanation or markdown formatting.`;
+    
+    const suggestions = await generateWithGroq(prompt, "llama-3.1-8b-instant");
+    console.log("Autocomplete suggestions generated successfully");
+
+    res.json({ suggestions });
+  } catch (error) {
+    console.error("Autocomplete error:", error.message);
+    res.status(500).json({ error: "Failed to generate code suggestions" });
+  }
+});
+
+app.post("/codeai/fix", async (req, res) => {
+  try {
+    console.log("Code fix request received:", new Date().toISOString());
+    const { code } = req.body;
+
+    if (!code || typeof code !== "string") {
+      console.log("Invalid code input received");
+      return res.status(400).json({ error: "Valid code input is required" });
+    }
+
+    console.log(`Code length: ${code.length}`);
+    console.log(`Code snippet: ${code.substring(0, 100)}...`);
+
+    const prompt = `You are a Solidity security and optimization expert. Perform a comprehensive analysis of the following Solidity contract:
+
+\`\`\`solidity
+${code}
+\`\`\`
+
+Your task is to:
+1. Identify and fix any bugs, security vulnerabilities, or logical errors
+2. Optimize the code for gas efficiency without compromising readability
+3. Ensure the code follows current Solidity best practices
+4. Maintain the original functionality while improving the implementation
+
+IMPORTANT: You MUST return a JSON object with exactly two fields: "Reason" and "Code". Ensure your response is properly escaped and contains no control characters, line breaks in strings should be represented as \\n not actual newlines within the JSON string values. Do not include any text outside the JSON object.
+
+Format example:
+{"Reason": "Summary of changes", "Code": "contract Example { ... }"}`;
+
+    const response = await generateWithGroq(prompt, "llama-3.3-70b-versatile");
+    
+    try {
+
+      const cleanedResponse = sanitizeJsonString(response);
+      console.log("Attempting to parse JSON response");
+      
+      const jsonResponse = JSON.parse(cleanedResponse);
+      console.log("JSON parsing successful");
+      
+
+      if (!jsonResponse.Reason || !jsonResponse.Code) {
+        console.error("Missing required fields in JSON response");
+        throw new Error("Invalid response format: missing Reason or Code fields");
+      }
+      
+      res.json(jsonResponse);
+    } catch (error) {
+      console.error("JSON parsing error:", error.message);
+      console.error("Raw response:", response);
+      
+      try {
+        console.log("Attempting regex fallback extraction");
+        const reasonMatch = response.match(/["']Reason["']\s*:\s*["']([^"']*)["']/);
+        const codeMatch = response.match(/["']Code["']\s*:\s*["']([^"']*)["']/);
+        
+        if (reasonMatch && codeMatch) {
+          const extractedReason = reasonMatch[1].replace(/\\n/g, '\n');
+          const extractedCode = codeMatch[1].replace(/\\n/g, '\n');
+          
+          console.log("Regex extraction successful");
+          res.json({
+            Reason: extractedReason,
+            Code: extractedCode
+          });
+        } else {
+          throw new Error("Regex extraction failed");
+        }
+      } catch (regexError) {
+        console.error("Regex fallback failed:", regexError.message);
+        res.status(500).json({ 
+          error: "Invalid JSON response from AI.",
+          rawResponse: response.substring(0, 200) + "..." 
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Code fix error:", error.message);
+    res.status(500).json({ error: "Failed to analyze and fix code" });
   }
 });
 
