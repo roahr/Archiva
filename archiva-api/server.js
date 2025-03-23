@@ -44,8 +44,130 @@ const PINATA_API_KEY = process.env.PINATA_API_KEY;
 const PINATA_SECRET_API_KEY = process.env.PINATA_SECRET_API_KEY;
 
 const provider = new ethers.JsonRpcProvider(process.env.EDUCHAIN_RPC_URL);
-const archivaRegistryAddress = process.env.ARCHIVA_REGISTRY_ADDRESS;
-const archivaRegistryABI = JSON.parse(process.env.ARCHIVA_REGISTRY_ABI || '[]');
+const archivaRegistryAddress = "0xDCCb6B190EB3691749F8cAf77cA77729B555B7a5";
+const archivaRegistryABI = [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "contractAddress",
+          "type": "address"
+        }
+      ],
+      "name": "addContract",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "contractList",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "contracts",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "contractAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "enum ArchivaRegistry.ContractState",
+          "name": "state",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "ipfsHash",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAllContracts",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "contractAddress",
+          "type": "address"
+        }
+      ],
+      "name": "getContractState",
+      "outputs": [
+        {
+          "internalType": "enum ArchivaRegistry.ContractState",
+          "name": "",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "contractAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "enum ArchivaRegistry.ContractState",
+          "name": "newState",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "ipfsHash",
+          "type": "string"
+        }
+      ],
+      "name": "updateContractState",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ];
 
 const archivaRegistry = new ethers.Contract(archivaRegistryAddress, archivaRegistryABI, provider);
 
@@ -368,6 +490,30 @@ app.get('/fetch-archived-contract/:ipfsHash', async (req, res) => {
 
     const contractData = await retrieveFromPinata(ipfsHash);
     res.json({ ipfsHash, contractData });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/archived-contracts', async (req, res) => {
+  try {
+    // Fetch all contracts from the ArchivaRegistry
+    const allContracts = await archivaRegistry.getAllContracts();
+
+    // Fetch the state and IPFS hash for each contract
+    const archivedContracts = await Promise.all(
+      allContracts.map(async (contractAddress) => {
+        const [state, ipfsHash] = await archivaRegistry.getContractState(contractAddress);
+        return { contractAddress, state: ContractState[state], ipfsHash };
+      })
+    );
+
+    // Filter contracts with state "Archived"
+    const filteredArchivedContracts = archivedContracts.filter(
+      (contract) => contract.state === "Archived"
+    );
+
+    res.json({ archivedContracts: filteredArchivedContracts });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
