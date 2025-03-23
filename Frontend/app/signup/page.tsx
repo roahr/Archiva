@@ -31,13 +31,43 @@ export default function AuthPage() {
     }
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      
-      toast.success(isLogin ? "Welcome back!" : "Account created successfully!")
-      router.push("/contracts")
-    } catch (error) {
-      toast.error("Something went wrong. Please try again.")
+      const endpoint = isLogin ? '/login' : '/register'
+      const response = await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          username: formData.fullName, // Using fullName as username for registration
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong')
+      }
+
+      if (isLogin) {
+        // Store the JWT token for future authenticated requests
+        localStorage.setItem('token', data.token)
+        toast.success("Welcome back!")
+      } else {
+        toast.success("Account created successfully! Please log in.")
+        setIsLogin(true) // Switch to login form after successful registration
+        setFormData({
+          ...formData,
+          password: '',
+          confirmPassword: '',
+        })
+        return
+      }
+
+      router.push("/dashboard")
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong. Please try again.")
     } finally {
       setIsLoading(false)
     }
