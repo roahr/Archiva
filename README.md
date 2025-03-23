@@ -24,11 +24,11 @@ By archiving deployed contracts onto **IPFS**, Archiva significantly **reduces b
 
 ## **Features**  
 
-✅ **Smart Contract Archiving** – Offloads deployed contracts to IPFS, reducing blockchain storage costs.  
-✅ **Gas Fee Optimization** – Minimizes gas consumption during contract interactions.  
-✅ **AI-Assisted Development** – Provides AI-powered code suggestions, optimizations, and security fixes.  
-✅ **Full Contract Lifecycle Management** – Enables seamless contract tracking, archiving, and restoration.  
-✅ **Seamless Integration with EduChain** – Designed to function natively within the EduChain ecosystem.  
+**Smart Contract Archiving** – Offloads deployed contracts to IPFS, reducing blockchain storage costs.  
+**Gas Fee Optimization** – Minimizes gas consumption during contract interactions.  
+**AI-Assisted Development** – Provides AI-powered code suggestions, optimizations, and security fixes.  
+**Full Contract Lifecycle Management** – Enables seamless contract tracking, archiving, and restoration.  
+**Seamless Integration with EduChain** – Designed to function natively within the EduChain ecosystem.  
 
 
 
