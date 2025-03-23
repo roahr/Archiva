@@ -128,56 +128,56 @@ export default function LandingPage() {
       </section>
 
       {/* Team Section */}
-      <section id="team" className="py-20 bg-[#2B2B2B] text-white text-center">
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold mb-4 text-[#91E4F2]">Our Team</h2>
-          <p className="text-[#A09F9F] mb-12 max-w-2xl mx-auto">
-            Meet the Archiva team: blockchain experts dedicated to revolutionizing smart
-            contract deployment and management.
-          </p>
-          <div className="grid grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="group">
-              <div className="overflow-hidden rounded-lg mb-4 border border-[#91E4F2]/10 transition-all duration-300 group-hover:border-[#91E4F2]/30">
-                <Image
-                  src="/team/member1.jpg"
-                  alt="Team Member"
-                  width={300}
-                  height={400}
-                  className="rounded-lg transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-              <h3 className="text-xl font-bold">Jayashre</h3>
-              <p className="text-[#A09F9F]">Blockchain Developer</p>
-            </div>
-            <div className="group">
-              <div className="overflow-hidden rounded-lg mb-4 border border-[#91E4F2]/10 transition-all duration-300 group-hover:border-[#91E4F2]/30">
-                <Image
-                  src="/team/member2.jpg"
-                  alt="Team Member"
-                  width={300}
-                  height={400}
-                  className="rounded-lg transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-              <h3 className="text-xl font-bold">Nidhi G</h3>
-              <p className="text-[#A09F9F]">UI Developer</p>
-            </div>
-            <div className="group">
-              <div className="overflow-hidden rounded-lg mb-4 border border-[#91E4F2]/10 transition-all duration-300 group-hover:border-[#91E4F2]/30">
-                <Image
-                  src="/team/member3.jpg"
-                  alt="Team Member"
-                  width={300}
-                  height={400}
-                  className="rounded-lg transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-              <h3 className="text-xl font-bold">Roahith R</h3>
-              <p className="text-[#A09F9F]">Smart Contract Expert</p>
-            </div>
-          </div>
+<section id="team" className="py-20 bg-[#2B2B2B] text-white text-center">
+  <div className="container mx-auto px-6">
+    <h2 className="text-4xl font-bold mb-4 text-[#91E4F2]">Our Team</h2>
+    <p className="text-[#A09F9F] mb-12 max-w-2xl mx-auto">
+      Meet the Archiva team: blockchain experts dedicated to revolutionizing smart
+      contract deployment and management.
+    </p>
+    <div className="grid grid-cols-3 gap-8 max-w-4xl mx-auto">
+      <div className="group">
+        <div className="overflow-hidden rounded-lg mb-4  transition-all duration-300 ">
+          <Image
+            src="/JayashreDP.JPG"
+            alt="Team Member"
+            width={300}
+            height={400}
+            className="rounded-lg transition-transform duration-300 group-hover:scale-105 w-64 h-64 object-cover"
+          />
         </div>
-      </section>
+        <h3 className="text-xl font-bold">Jayashre</h3>
+        <p className="text-[#A09F9F]">Blockchain Developer</p>
+      </div>
+      <div className="group">
+        <div className="overflow-hidden rounded-lg mb-4  transition-all duration-300 ">
+          <Image
+            src="/nidhi.jpg"
+            alt="Team Member"
+            width={300}
+            height={400}
+            className="rounded-lg transition-transform duration-300 group-hover:scale-105 w-64 h-64 object-cover"
+          />
+        </div>
+        <h3 className="text-xl font-bold">Nidhi G</h3>
+        <p className="text-[#A09F9F]">UI Developer</p>
+      </div>
+      <div className="group">
+        <div className="overflow-hidden rounded-lg mb-4  transition-all duration-300 ">
+          <Image
+            src="/roahith.jpeg"
+            alt="Team Member"
+            width={300}
+            height={400}
+            className="rounded-lg transition-transform duration-300 group-hover:scale-105 w-64 h-64 object-cover"
+          />
+        </div>
+        <h3 className="text-xl font-bold">Roahith R</h3>
+        <p className="text-[#A09F9F]">Backend Engineer</p>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* Pricing Section */}
       <section className="py-20 bg-gradient-to-br from-[#2B2B2B] to-[#522C94]/20 text-white text-center">
