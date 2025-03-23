@@ -25,8 +25,8 @@ export function ContractDetails({ id }: ContractDetailsProps) {
         id,
         name: "TokenSwap.sol",
         status: "active",
-        created: "March 15, 2023",
-        modified: "March 15, 2023",
+        created: "March 23, 2025",
+        modified: "March 23, 2025",
         storage: "On-chain",
         size: "12.4 KB",
         vendor: "Acme Inc.",
@@ -97,9 +97,9 @@ contract TokenSwap is Ownable {
     }
 }`,
         transactions: [
-          { hash: "0x1a2b3c...", type: "Deploy", timestamp: "March 15, 2023 14:30", status: "success" },
-          { hash: "0x4d5e6f...", type: "Call: swap()", timestamp: "March 15, 2023 15:45", status: "success" },
-          { hash: "0x7g8h9i...", type: "Call: setFeeRate()", timestamp: "March 15, 2023 16:20", status: "success" },
+          { hash: "0x1a2b3c...", type: "Deploy", timestamp: "March 23, 2025 14:30", status: "success" },
+          { hash: "0x4d5e6f...", type: "Call: swap()", timestamp: "March 23, 2025 15:45", status: "success" },
+          { hash: "0x7g8h9i...", type: "Call: setFeeRate()", timestamp: "March 23, 2025 16:20", status: "success" },
         ],
       })
       setLoading(false)
