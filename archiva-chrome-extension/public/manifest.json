@@ -1,0 +1,10 @@
+{
+    "manifest_version": 3,
+    "name": "Archiva",
+    "version": "1.0.0",
+    "description": "Seamlessly Manage Smart Contracts with Security and Privacy",
+    "action": {
+      "default_popup": "index.html"
+    },
+    "permissions": []
+  }
