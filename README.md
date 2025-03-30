@@ -83,7 +83,7 @@ By archiving deployed contracts onto **IPFS**, Archiva significantly **reduces b
 ## **Installation and Setup**  
 
 The project is divided into three directories:  
-1. [**Website**]() – Contains the frontend code.  
+1. [**Website**](https://github.com/roahr/Archiva/tree/main/Frontend) – Contains the frontend code.  
 2. [**API**](https://github.com/roahr/Archiva/tree/main/archiva-api) – Contains the backend server and API logic.  
 3. [**Smart Contracts**](https://github.com/roahr/Archiva/tree/main/archiva-educhain) – Contains the Solidity contracts and deployment scripts.  
 
